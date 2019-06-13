@@ -11,5 +11,15 @@
 10: [817, 1076, 980, 550, 686, 902, 450, 565, 875, 1252, 0]
 cities: [Paris, Rennes, Bordeaux, Lyon, Clermont-Ferrand, Poitiers, Annecy, Nancy,
   Lille, Quimper, Padoue]
-
-  
+positions:
+  Annecy: [45.88975045, 6.135465100226]
+  Bordeaux: [44.841225, -0.5800364]
+  Clermont-Ferrand: [45.7774551, 3.0819427]
+  Lille: [50.6305089, 3.0706414]
+  Lyon: [45.7578137, 4.8320114]
+  Nancy: [48.6937223, 6.1834097]
+  Padoue: [45.4077172, 11.8734455]
+  Paris: [48.8566101, 2.3514992]
+  Poitiers: [46.5802596, 0.340196]
+  Quimper: [47.9960325, -4.1024782]
+  Rennes: [48.1113387, -1.6800198]
