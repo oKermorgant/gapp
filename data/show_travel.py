@@ -42,4 +42,8 @@ plt.tight_layout()
 travel = array([positions[o] for o in order])
 plt.plot(travel[:,1],travel[:,0],'r-D',transform=ccrs.Geodetic())
 
+xm,xM = min(travel[:,1]), max(travel[:,1])
+ym, yM = min(travel[:,0]), max(travel[:,0])
+#plt.axis((xm - 0.05*(xM-xm), xM + 0.05*(xM-xm), ym - 0.05*(yM-ym), yM + 0.05*(yM-ym)))
+
 plt.show()

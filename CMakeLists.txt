@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_CXX_STANDARD 11)
 add_compile_options(-pthread)
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(YamlCpp yaml-cpp)

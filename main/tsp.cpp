@@ -22,25 +22,21 @@ void printSummary(std::chrono::time_point<std::chrono::system_clock> start,
 
 int main(int argc, char ** argv)
 {
-  std::srand(std::time(0));
-
-
   // load configuration for genetic algorithm
   YAML::Node config = YAML::LoadFile("../data/config.yaml");
 
   // load travel cost from YAML
-
   std::string path = "../data/tsp.yaml";
   if(argc > 1)
     path = std::string(argv[1]);
   YAML::Node data = YAML::LoadFile(path);
   YAML::Node cities = data["cities"];
-  const unsigned int N = cities.size();
+  const auto N = cities.size();
   std::vector<std::vector<double> > nodes(N);
-  for(unsigned int i=0;i<N;++i)
+  for(uint i=0;i<N;++i)
   {
     nodes[i].resize(N);
-    for(unsigned int j=0;j<N;++j)
+    for(uint j=0;j<N;++j)
       nodes[i][j] = data[i][j].as<double>();
   }
 
@@ -74,8 +70,6 @@ int main(int argc, char ** argv)
   for(auto i: t.ordering_)
     ss << " " << i;
   system(ss.str().c_str());
-
-
 
 
 }

@@ -25,14 +25,17 @@ public:
     void print(const YAML::Node& cities);
 
     inline static void waitForCosts() {}
+    inline double cost() const {return cost_;}
 
-    double cost;
+
+
 
 protected:
 
     static std::vector<std::vector<double> > nodes_;    
     static unsigned int n_;
     static bool closed_;
+    double cost_;
 };
 
 
