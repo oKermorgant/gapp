@@ -6,12 +6,14 @@
 
 using namespace std;
 
+
+
 inline uint rand_int( int start, uint end)
 {
   static std::random_device rd;
   static std::mt19937 gen(rd());
-  std::uniform_int_distribution<> dis(start, static_cast<int>(end));
-  return static_cast<uint>(dis(gen));
+  static std::uniform_int_distribution<> dis(start, static_cast<int>(end));
+  return static_cast<uint>(dis(gen));  
 }
 
 // static variables
@@ -26,8 +28,7 @@ Travel::Travel(const std::vector<std::vector<double> > &_nodes, bool _closed)
     nodes_ = _nodes;
     n_ = nodes_.size();
     ordering_.resize(n_);
-    for(uint i=0;i<n_;++i)
-        ordering_[i] = i;
+    std::iota(ordering_.begin(), ordering_.end(), 0);
     closed_ = _closed;
 }
 

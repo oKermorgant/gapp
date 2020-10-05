@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 import yaml
 import cartopy.crs as ccrs 
@@ -11,7 +11,8 @@ filename = 'tsp.yaml'
 if len(argv) > 1 and not argv[1].isdigit():
     filename = argv[1]
     
-data = yaml.load(file(filename))
+with open(filename) as f:
+    data = yaml.safe_load(f)
 cities = data['cities']
 positions = [data['positions'][city] for city in cities]
 

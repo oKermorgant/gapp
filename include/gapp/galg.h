@@ -16,6 +16,7 @@ bool operator<(const T &i1, const T& i2)
 {
   return i1.cost() < i2.cost();
 }
+
 namespace gapp
 {
 

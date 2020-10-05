@@ -53,17 +53,17 @@ int main(int argc, char ** argv)
   gapp::solveSingleRun(t, config);
   printSummary(start, t, "Single run solution",cities );
 
-  // 50 runs without threading
+  // 100 runs without threading
   start = std::chrono::system_clock::now();
   gapp::solveMultiRun(t, 100, config, false);
   printSummary(start, t, "Multi run solution", cities);
-
+/*
   // 200 runs in 4 threads
   start = std::chrono::system_clock::now();
   gapp::solveMultiThread(t, 100, 4, config, false);
   printSummary(start, t, "Multi run x multi thread solution", cities);
 
-
+*/
   // display map just for fun
   std::stringstream ss;
   ss << "python ../data/show_travel.py " << path;
