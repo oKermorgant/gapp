@@ -10,12 +10,12 @@ using namespace gapp;
 
 void printSummary(std::chrono::time_point<std::chrono::system_clock> start,
                   Travel t,
-                  std::string legend,
+                  const std::string &legend,
                   const YAML::Node & cities)
 {
   std::chrono::duration<double> elapsed_seconds =
       std::chrono::system_clock::now()-start;
-  cout << legend << " in " << 1000*elapsed_seconds.count() << " ms" << std::endl;
+  cout << '\n' << legend << " in " << 1000*elapsed_seconds.count() << " ms" << std::endl; 
   t.print(cities);
   cout << endl;
 }
@@ -23,12 +23,11 @@ void printSummary(std::chrono::time_point<std::chrono::system_clock> start,
 int main(int argc, char ** argv)
 {
   // load configuration for genetic algorithm
-  YAML::Node config = YAML::LoadFile("../data/config.yaml");
+  const std::string tsp_dir{TSP_DIR};
+  YAML::Node config = YAML::LoadFile(tsp_dir + "config.yaml");
 
   // load travel cost from YAML
-  std::string path = "../data/tsp.yaml";
-  if(argc > 1)
-    path = std::string(argv[1]);
+  const auto path = tsp_dir + (argc > 1 ? argv[1] : "tsp.yaml");
   YAML::Node data = YAML::LoadFile(path);
   YAML::Node cities = data["cities"];
   const auto N = cities.size();
@@ -57,19 +56,16 @@ int main(int argc, char ** argv)
   start = std::chrono::system_clock::now();
   gapp::solveMultiRun(t, 100, config, false);
   printSummary(start, t, "Multi run solution", cities);
-/*
-  // 200 runs in 4 threads
+
+  // 100 runs in 4 threads
   start = std::chrono::system_clock::now();
   gapp::solveMultiThread(t, 100, 4, config, false);
   printSummary(start, t, "Multi run x multi thread solution", cities);
 
-*/
   // display map just for fun
   std::stringstream ss;
   ss << "python ../data/show_travel.py " << path;
   for(auto i: t.ordering_)
     ss << " " << i;
-  system(ss.str().c_str());
-
-
+  auto ignored(system(ss.str().c_str()));
 }

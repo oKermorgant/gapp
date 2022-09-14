@@ -22,13 +22,10 @@ public:
 
     void computeCost();
     void crossAndMutate(const Travel &_father, const Travel &_mother);
-    void print(const YAML::Node& cities);
+    void print(const YAML::Node& cities, uint start=0);
 
     inline static void waitForCosts() {}
     inline double cost() const {return cost_;}
-
-
-
 
 protected:
 

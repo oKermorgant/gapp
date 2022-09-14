@@ -8,12 +8,11 @@ using namespace std;
 
 
 
-inline uint rand_int( int start, uint end)
+inline uint rand_int( uint start, uint end)
 {
   static std::random_device rd;
   static std::mt19937 gen(rd());
-  static std::uniform_int_distribution<> dis(start, static_cast<int>(end));
-  return static_cast<uint>(dis(gen));  
+  return std::uniform_int_distribution<uint>(start, end)(gen);
 }
 
 // static variables
@@ -84,8 +83,12 @@ void Travel::crossAndMutate(const Travel &_father, const Travel &_mother)
     computeCost();
 }
 
-void Travel::print(const YAML::Node &cities)
+void Travel::print(const YAML::Node &cities, uint start)
 {
+  // find the first city to homogenize prints
+    auto where = std::find(ordering_.begin(), ordering_.end(), start);
+    std::rotate(ordering_.begin(), where, ordering_.end());
+
     cout << "cost: " << cost_ << endl;
     for(uint i=0;i<ordering_.size()-1;++i)
         cout << cities[ordering_[i]] << " -> ";
