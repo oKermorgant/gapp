@@ -2,23 +2,10 @@
 #include <gapp/galg.h>
 #include <travel.h>
 #include <yaml-cpp/yaml.h>
-#include <map>
-#include <chrono>
 
 using namespace std;
 using namespace gapp;
 
-void printSummary(std::chrono::time_point<std::chrono::system_clock> start,
-                  Travel t,
-                  const std::string &legend,
-                  const YAML::Node & cities)
-{
-  std::chrono::duration<double> elapsed_seconds =
-      std::chrono::system_clock::now()-start;
-  cout << '\n' << legend << " in " << 1000*elapsed_seconds.count() << " ms" << std::endl; 
-  t.print(cities);
-  cout << endl;
-}
 
 int main(int argc, char ** argv)
 {
@@ -39,33 +26,17 @@ int main(int argc, char ** argv)
       nodes[i][j] = data[i][j].as<double>();
   }
 
-  Travel t(nodes, true);
+  Travel t(nodes);
 
-  std::chrono::time_point<std::chrono::system_clock> start;
-
-  t.randomize();
-  cout << "Random solution" << endl;
-  t.print(cities);
-
-  // single-run solver
-  start = std::chrono::system_clock::now();
+  // actual GA
   gapp::solveSingleRun(t, config);
-  printSummary(start, t, "Single run solution",cities );
+  t.print(path, cities);
 
-  // 100 runs without threading
-  start = std::chrono::system_clock::now();
-  gapp::solveMultiRun(t, 100, config, false);
-  printSummary(start, t, "Multi run solution", cities);
+  // brute force
+  config["iter_max"] = 2;
+  config["full_pop"] = 500000;
+  gapp::solveSingleRun(t, config);
+  t.print(path, cities);
 
-  // 100 runs in 4 threads
-  start = std::chrono::system_clock::now();
-  gapp::solveMultiThread(t, 100, 4, config, false);
-  printSummary(start, t, "Multi run x multi thread solution", cities);
 
-  // display map just for fun
-  std::stringstream ss;
-  ss << "python ../data/show_travel.py " << path;
-  for(auto i: t.ordering_)
-    ss << " " << i;
-  auto ignored(system(ss.str().c_str()));
 }

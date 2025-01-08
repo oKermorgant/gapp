@@ -1,4 +1,4 @@
 iter_max: 200
-keep_best: 5
-iter_out: 40
-full_pop: 100
+keep_best: 90
+iter_out: 100
+full_pop: 500

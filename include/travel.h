@@ -9,30 +9,24 @@ class Travel
 public:
     std::vector<unsigned int> ordering_;
 
-    Travel()
-    {
-        ordering_.resize(n_);
-        for(unsigned int i=0;i<n_;++i)
-            ordering_[i] = i;
-    }
+    Travel() : ordering_{std::vector<uint>(n_)} {}
 
     void randomize();
 
-    Travel(const std::vector<std::vector<double> > &_nodes, bool _closed = false);
+    Travel(const std::vector<std::vector<double> > &_nodes);
 
     void computeCost();
-    void crossAndMutate(const Travel &_father, const Travel &_mother);
-    void print(const YAML::Node& cities, uint start=0);
+    void crossAndMutate(const Travel &_t1, const Travel &_t2);
+    void print(const std::string &src, const YAML::Node& cities) const;
 
     inline static void waitForCosts() {}
     inline double cost() const {return cost_;}
 
 protected:
 
-    static std::vector<std::vector<double> > nodes_;    
-    static unsigned int n_;
-    static bool closed_;
-    double cost_;
+    inline static std::vector<std::vector<double> > nodes_{};
+  inline static unsigned int n_{};
+    double cost_ = 0;
 };
 
 

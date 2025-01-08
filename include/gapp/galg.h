@@ -9,9 +9,17 @@
 #include <yaml-cpp/yaml.h>
 #include <iostream>
 #include <random>
+#include <concepts>
 
+template <typename T>
+concept Individual = requires(T candidate)
+{
+  {candidate.randomize()};
+  {candidate.crossAndMutate(std::declval<const T&>(), std::declval<const T&>())};
+  {candidate.cost()} -> std::convertible_to<double>;
+};
 
-template<class T>
+template<Individual T>
 bool operator<(const T &i1, const T& i2)
 {
   return i1.cost() < i2.cost();
@@ -26,10 +34,10 @@ std::pair<uint, uint> different_randoms(uint n)
   static std::default_random_engine engine(rd());
 
   const auto n1{std::uniform_int_distribution<uint>(0,n-1)(engine)};
-  auto n2{std::uniform_int_distribution<uint>(0,n-2)(engine)};
+  const auto n2{std::uniform_int_distribution<uint>(0,n-2)(engine)};
 
   if(n1 == n2)
-    n2++;
+    return {n1, n2+1};
   return {n1, n2};
 }
 
@@ -40,8 +48,8 @@ uint readFrom(const YAML::Node &config, std::string key, uint default_val)
   return default_val;
 }
 
-template <class Indiv>
-inline Indiv bestTopN(std::vector<Indiv> &population,
+template <Individual Candidate>
+inline Candidate bestTopN(std::vector<Candidate> &population,
                 uint keep_best,
                 uint pop_size)
 {
@@ -52,7 +60,8 @@ inline Indiv bestTopN(std::vector<Indiv> &population,
 }
 
 // perform a single run with a random population
-template<class Indiv> void solveSingleRun(Indiv &best, const YAML::Node &config = YAML::Node())
+template<Individual Candidate>
+void solveSingleRun(Candidate &best, const YAML::Node &config = YAML::Node())
 {    
   const uint keep_best(readFrom(config, "keep_best", 5));
   const uint max_iter(readFrom(config, "iter_max", 100));
@@ -61,10 +70,10 @@ template<class Indiv> void solveSingleRun(Indiv &best, const YAML::Node &config 
   const auto half_population(full_population/2);
 
   // init first population from random individuals
-  std::vector<Indiv> population(full_population + half_population-keep_best);
+  std::vector<Candidate> population(full_population + half_population-keep_best);
   for(size_t idx = 0; idx < full_population; ++idx)
     population[idx].randomize();
-  Indiv::waitForCosts();
+  Candidate::waitForCosts();
 
   best = bestTopN(population, keep_best, full_population);
   auto best_cost = best.cost();
@@ -92,7 +101,7 @@ template<class Indiv> void solveSingleRun(Indiv &best, const YAML::Node &config 
       // cross between parents + compute cost
       population[i].crossAndMutate(population[n1],population[n2]);
     }
-    Indiv::waitForCosts();
+    Candidate::waitForCosts();
 
     // re-sort from new costs
     best = bestTopN(population, keep_best, full_population);
@@ -109,9 +118,10 @@ template<class Indiv> void solveSingleRun(Indiv &best, const YAML::Node &config 
 
 // perform a given number of runs and returns the best one in _best
 // not to be used directly
-template<class T> void solveMultiRun(T &best, int _runs = 0, const YAML::Node &config = YAML::Node(), bool display = false, int _thread_n = 0)
+template<Individual Candidate>
+void solveMultiRun(Candidate &best, int _runs = 0, const YAML::Node &config = YAML::Node(), bool display = false, int _thread_n = 0)
 {
-  T indiv;
+  Candidate indiv;
   std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(100*_thread_n));
 
   int base_run = (_thread_n-1) * _runs+1;
@@ -135,18 +145,19 @@ template<class T> void solveMultiRun(T &best, int _runs = 0, const YAML::Node &c
 
 
 // performs a given number of runs across a given number of threads, returns the overall best result
-template<class T> void solveMultiThread(T &best, int _runs = 10, int _n_threads = 1, const YAML::Node &config = YAML::Node(), bool display = false)
+template<Individual Candidate>
+void solveMultiThread(Candidate &best, int _runs = 10, int _n_threads = 1, const YAML::Node &config = YAML::Node(), bool display = false)
 {
   if(_n_threads > _runs)
     _n_threads = _runs;
   std::vector<std::thread> threads;
-  std::vector<T> bests(_n_threads);
+  std::vector<Candidate> bests(_n_threads);
 
   int div = _runs / _n_threads;
   std::cout << "runs per thread: " << div << std::endl;
 
   for(int i=0;i<_n_threads;++i)
-    threads.push_back(std::thread(solveMultiRun<T>, std::ref(bests[i]), div, config, display, i+1));
+    threads.push_back(std::thread(solveMultiRun<Candidate>, std::ref(bests[i]), div, config, display, i+1));
 
   for(auto &t: threads)
     t.join();
