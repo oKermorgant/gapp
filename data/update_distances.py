@@ -13,7 +13,11 @@ data = yaml.safe_load(open(name))
 data['positions'] = {}
 
 geolocator = Nominatim(user_agent='travelling salesman initialization')
-geo = [geolocator.geocode(city, timeout=10) for city in data['cities']]
+geo = []
+for city in data['cities']:
+    print('Getting GPS coord for', city, end='', flush=True)
+    geo.append(geolocator.geocode(city, timeout=10))
+    print(' ... ok')
 
 for i,src in enumerate(geo):
     data[i] = [int(geodesic(src.point,dst.point).km) for dst in geo]
