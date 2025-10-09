@@ -19,7 +19,6 @@ public:
     void crossAndMutate(const Travel &_t1, const Travel &_t2);
     void print(const std::string &src, const YAML::Node& cities) const;
 
-    inline static void waitForCosts() {}
     inline double cost() const {return cost_;}
 
 protected:

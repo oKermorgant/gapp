@@ -10,6 +10,7 @@
 #include <iostream>
 #include <random>
 #include <concepts>
+#include <execution>
 
 template <typename T>
 concept Individual = requires(T candidate)
@@ -48,19 +49,20 @@ uint readFrom(const YAML::Node &config, std::string key, uint default_val)
   return default_val;
 }
 
-template <Individual Candidate>
+template <class Candidate>
 inline Candidate bestTopN(std::vector<Candidate> &population,
                 uint keep_best,
                 uint pop_size)
 {
-  std::nth_element(population.begin(), population.begin()+keep_best,
+  std::nth_element(std::execution::par,
+                   population.begin(), population.begin()+keep_best,
                    population.begin() + pop_size);
   return *std::min_element(population.begin(),
                            population.begin()+keep_best);
 }
 
 // perform a single run with a random population
-template<Individual Candidate>
+template <Individual Candidate>
 void solveSingleRun(Candidate &best, const YAML::Node &config = YAML::Node())
 {    
   const uint keep_best(readFrom(config, "keep_best", 5));
@@ -71,9 +73,10 @@ void solveSingleRun(Candidate &best, const YAML::Node &config = YAML::Node())
 
   // init first population from random individuals
   std::vector<Candidate> population(full_population + half_population-keep_best);
-  for(size_t idx = 0; idx < full_population; ++idx)
-    population[idx].randomize();
-  Candidate::waitForCosts();
+
+  std::for_each(std::execution::par,
+                population.begin(), population.begin()+full_population,
+                std::mem_fn(&Candidate::randomize));
 
   best = bestTopN(population, keep_best, full_population);
   auto best_cost = best.cost();
@@ -84,24 +87,25 @@ void solveSingleRun(Candidate &best, const YAML::Node &config = YAML::Node())
   while(iter++ < max_iter && iter_same< max_same)   // max iteration and max iteration where the best is always the same
   {
     // selection, 1 vs 1 tournament to fill half of the population
-    for(size_t selected = 0; selected < half_population-keep_best; selected++)
-    {
-      const auto [n1,n2] = different_randoms(full_population); {}
-      population[full_population+selected] = std::min(population[n1], population[n2]);
-    }
+    std::for_each(std::execution::par, population.begin()+full_population, population.end(),
+                  [&full_population, &population](Candidate &c)
+                  {const auto [n1,n2] = different_randoms(full_population);
+                   c = std::min(population[n1], population[n2]);});
+
 
     // put new elements after elites
     std::copy(population.begin()+full_population, population.end(),
               population.begin()+keep_best);
 
     // crossing and mutation to fill other half of the new pop
-    for(uint i=half_population;i<full_population;++i)
-    {
-      const auto [n1,n2] = different_randoms(half_population); {}
-      // cross between parents + compute cost
-      population[i].crossAndMutate(population[n1],population[n2]);
-    }
-    Candidate::waitForCosts();
+    std::for_each(std::execution::par,
+                  population.begin()+half_population, population.begin()+full_population,
+                  [&half_population, &population](Candidate &c)
+                  {
+                    const auto [n1,n2] = different_randoms(half_population); {}
+                    // cross between parents + compute cost
+                    c.crossAndMutate(population[n1],population[n2]);
+                  });
 
     // re-sort from new costs
     best = bestTopN(population, keep_best, full_population);

@@ -24,6 +24,7 @@ Travel::Travel(const std::vector<std::vector<double> > &_nodes)
 }
 
 // randomize
+
 void Travel::randomize()
 {  
     std::iota(ordering_.begin(), ordering_.end(), 0);

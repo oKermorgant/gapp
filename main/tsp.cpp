@@ -1,4 +1,3 @@
-#include <iostream>
 #include <gapp/galg.h>
 #include <travel.h>
 #include <yaml-cpp/yaml.h>
